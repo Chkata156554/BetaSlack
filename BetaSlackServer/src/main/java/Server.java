@@ -5,53 +5,45 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Server {
 
     private ServerSocket serverSocket;
-    private Socket clientSocket;
-    private BufferedReader clientInput;
-    private PrintWriter output;
-    private static final String EXIT_KEYWORD = "exit";
+    private List<Socket> connectedClients = new ArrayList<Socket>();
+    private boolean online;
+    private Thread acceptingThread;
 
     public void startServer (int port) throws IOException{
         serverSocket = new ServerSocket(port);
         System.out.println("Server pending...");
-        clientSocket = serverSocket.accept();
-        System.out.println("Client has been connected.");
+        online = true;
 
-        clientInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-        while(!clientSocket.isClosed()) {
-            String receivedMessage = "";
-
-            try {
-                receivedMessage = clientInput.readLine();
-            } catch(SocketException ex) {
-                System.out.println("Client has been disconnected");
-                break;
+        acceptingThread = new Thread(() -> {
+            while (online) {
+                Socket clientSocket = null;
+                try{
+                    clientSocket = serverSocket.accept();
+                } catch (IOException e){
+                    online = false;
+                    System.out.println("Server has been disconnected.");
+                    break;
+                }
+                connectedClients.add(clientSocket);
+                System.out.println("Client has been connected." + "Users online: " + connectedClients.size());
             }
+        });
+        acceptingThread.start();
+    }
 
-            if(receivedMessage.toLowerCase().equals(EXIT_KEYWORD)) {
-                break;
-            }
+    public void shutdown(){
+        online = false;
 
-            System.out.println(receivedMessage);
-        }
+    }
 
-        /**input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        output = new PrintWriter(clientSocket.getOutputStream(), true);
-        output.println("Hello from server");
-        System.out.println(input.readLine());
-
-
-
-
-        while(clientSocket.isClosed() && !clientSocket.isInputShutdown()){
-        }
-        System.out.println("Client has disconnected.");
-         input = new BufferedReader(new InputStreamReader(socket.getInputStream()))
-         input.readLine();*/
+    public boolean isOnline(){
+        return online;
     }
 
 }
