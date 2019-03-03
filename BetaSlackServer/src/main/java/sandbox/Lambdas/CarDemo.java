@@ -8,10 +8,11 @@ public class CarDemo {
         int userPrice = 25000;
         int lowerYearLimit = 2002;
         int upperYearLimit = 2015;
-        view.applyFilter(car -> {
+       /** view.applyFilter(car -> {
                 return  car.getProducedIn() >= lowerYearLimit &&
                         car.getPrice() > userPrice &&
                         car.getProducedIn() <= upperYearLimit;
         });
-    }
+    }*/
+}
 }
