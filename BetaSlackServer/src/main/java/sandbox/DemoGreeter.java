@@ -1,3 +1,5 @@
+package sandbox;
+
 public class DemoGreeter {
     public static void main(String[] args) {
         Thread thread1 = new Thread(new Greeter("Thread1"));
