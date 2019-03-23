@@ -12,7 +12,7 @@ import java.util.List;
 
 public class Server {
 
-   /** private ServerSocket serverSocket;
+   private ServerSocket serverSocket;
     private List<Socket> connectedClients = new ArrayList<Socket>();
     private boolean online;
     private Thread acceptingThread;
@@ -46,6 +46,6 @@ public class Server {
 
     public boolean isOnline(){
         return online;
-    }*/
+    }
 
 }
