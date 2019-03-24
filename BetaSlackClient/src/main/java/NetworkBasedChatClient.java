@@ -1,5 +1,3 @@
-import java.io.IOException;
-
 public interface NetworkBasedChatClient extends ChatClient {
     void connect(String ip, int port);
     void disconnect();

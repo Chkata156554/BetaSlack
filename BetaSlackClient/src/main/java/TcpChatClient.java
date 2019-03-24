@@ -63,12 +63,13 @@ public class TcpChatClient implements NetworkBasedChatClient{
 
     @Override
     public void sendMessage(String message) {
-        if(isOnline())
-        output.println(message);
+        if(isOnline() && !message.trim().isEmpty())
+            output.println(message);
     }
 
     @Override
     public boolean isOnline() {
-        return clientSocket !=null && !clientSocket.isClosed();
+        return clientSocket !=null
+                && !clientSocket.isClosed();
     }
 }

@@ -1,5 +1,7 @@
 package network;
 
+import settings.ChannelSettings;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,10 +15,12 @@ public class TcpChatClient implements ChatClient {
     private PrintWriter output;
     private BufferedReader input;
     private Thread readerThread;
+    private String currentChannelName = ChannelSettings.DEFAULT_CHANNEL_NAME;
+    private final ChannelRepository channelRepository;
 
     private final List<DisconnectObserver> disconnectObservers = new ArrayList<>();
 
-    public TcpChatClient(Socket clientSocket) {
+    public TcpChatClient(Socket clientSocket, ChannelRepository channelRepository) {
         this.clientSocket = clientSocket;
         try {
             output = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -26,6 +30,7 @@ public class TcpChatClient implements ChatClient {
         } catch (IOException e) {
             throw new IllegalStateException("Error initializing client");
         }
+        this.channelRepository = channelRepository;
         startReading();
     }
 
@@ -49,8 +54,11 @@ public class TcpChatClient implements ChatClient {
             }
 
             System.out.println(msg);
+            channelRepository.findByName(currentChannelName)
+                    .ifPresent(channel -> channel.broadcast(this,msg));
         } catch (IOException e) {
-            // TBD
+            System.out.println(e.getMessage());
+            disconnect();
         }
     }
 
@@ -75,6 +83,20 @@ public class TcpChatClient implements ChatClient {
     @Override
     public boolean isOnline() {
         return clientSocket != null && !clientSocket.isClosed();
+    }
+
+    @Override
+    public void changeCurrentChannel(String channelName) {
+        if(!channelName.equals(currentChannelName)){
+            channelRepository.findByName(channelName)
+                    .orElseThrow(() -> new IllegalStateException("Channel does not exist."));
+            currentChannelName = channelName;
+        }
+    }
+
+    @Override
+    public String getCurrentChannelName() {
+        return currentChannelName;
     }
 
     @Override
